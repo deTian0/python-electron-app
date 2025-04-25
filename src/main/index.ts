@@ -1,10 +1,12 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
+const path = require('path');
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 let mainWindow
 let robotWindow
+let pyProc 
 
 function createRobotWindow() {
   // Create the browser window.
@@ -56,24 +58,44 @@ function createWindow(): void {
 }
 
 // 启动flask server，通过python-shell 调用python脚本（开发调试阶段）
-function startServer_PY() {
-  var { PythonShell } = require('python-shell')
-  const pythonPath = require('path').resolve(__dirname, '../../py/venv/Scripts/python')
-  const scriptPath = require('path').resolve(__dirname, '../../py/app.py')
+// function startServer_PY() {
+//   var { PythonShell } = require('python-shell')
+//   const pythonPath = require('path').resolve(__dirname, '../../py/venv/Scripts/python')
+//   const scriptPath = require('path').resolve(__dirname, '../../py/app.py')
 
-  let options = {
-    mode: 'text',
-    pythonPath: pythonPath
+//   let options = {
+//     mode: 'text',
+//     pythonPath: pythonPath
+//   }
+
+//   PythonShell.run(scriptPath, options, function (err, results) {
+//     if (err) {
+//       console.error('Error running Python script:', err)
+//       throw err
+//     }
+//     // results is an array consisting of messages collected during execution
+//     console.log('response: ', results)
+//   })
+// }
+
+// 启动flask server，通过子进程执行已经将python项目打包好的exe文件（打包阶段）
+function startServer_EXE() {
+  let script = path.join(__dirname,'../../', 'pydist', 'app', 'app.exe')
+  console.log(script)
+  pyProc = require('child_process').execFile(script)
+  if (pyProc != null) {
+      console.log('flask server start success')
+  }else{
+    console.log('flask server start shibai')
   }
 
-  PythonShell.run(scriptPath, options, function (err, results) {
-    if (err) {
-      console.error('Error running Python script:', err)
-      throw err
-    }
-    // results is an array consisting of messages collected during execution
-    console.log('response: ', results)
-  })
+}
+
+// 停止flask server 函数
+function stopServer() {
+  pyProc.kill()
+  console.log('kill flask server  success')
+  pyProc = null
 }
 
 // 监听最小化命令
@@ -104,7 +126,8 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-  startServer_PY()
+  // startServer_PY()
+  startServer_EXE();
   createWindow()
   createRobotWindow()
 
@@ -125,6 +148,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+  stopServer()
 })
 
 // In this file you can include the rest of your app's specific main process
