@@ -38,14 +38,19 @@ function createWindow(): void {
 // 启动flask server，通过python-shell 调用python脚本（开发调试阶段）
 function startServer_PY() {
   var {PythonShell} = require('python-shell');
+  const pythonPath = require('path').resolve(__dirname, '../../py/venv/Scripts/python');
+  const scriptPath = require('path').resolve(__dirname, '../../py/app.py');
 
   let options = {
       mode: 'text',
-      pythonPath: '../../py/venv/Scripts/python'
+      pythonPath: pythonPath
   };
 
-  PythonShell.run('../../py/app.py', options, function (err, results) {
-      if (err) throw err;
+  PythonShell.run(scriptPath, options, function (err, results) {
+      if (err) {
+        console.error('Error running Python script:', err);
+        throw err;
+      };
       // results is an array consisting of messages collected during execution
       console.log('response: ', results);
   });
