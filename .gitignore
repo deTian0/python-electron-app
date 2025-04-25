@@ -81,3 +81,5 @@ docker-compose.override.yml
 
 # 忽略日志文件
 @AutomationLog.txt
+
+ pydist/
