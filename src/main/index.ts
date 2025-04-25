@@ -3,9 +3,29 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+let mainWindow
+let robotWindow
+
+function createRobotWindow() {
+  // Create the browser window.
+  robotWindow = new BrowserWindow({
+    width: 300,
+    height: 200,
+    show: false,
+    alwaysOnTop: false,
+    autoHideMenuBar: false,
+    ...(process.platform === 'linux' ? { icon } : {}),
+    webPreferences: {
+      sandbox: false
+    }
+  })
+
+  robotWindow.loadFile(join(__dirname, '../renderer/robot.html'))
+}
+
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -37,24 +57,37 @@ function createWindow(): void {
 
 // 启动flask server，通过python-shell 调用python脚本（开发调试阶段）
 function startServer_PY() {
-  var {PythonShell} = require('python-shell');
-  const pythonPath = require('path').resolve(__dirname, '../../py/venv/Scripts/python');
-  const scriptPath = require('path').resolve(__dirname, '../../py/app.py');
+  var { PythonShell } = require('python-shell')
+  const pythonPath = require('path').resolve(__dirname, '../../py/venv/Scripts/python')
+  const scriptPath = require('path').resolve(__dirname, '../../py/app.py')
 
   let options = {
-      mode: 'text',
-      pythonPath: pythonPath
-  };
+    mode: 'text',
+    pythonPath: pythonPath
+  }
 
   PythonShell.run(scriptPath, options, function (err, results) {
-      if (err) {
-        console.error('Error running Python script:', err);
-        throw err;
-      };
-      // results is an array consisting of messages collected during execution
-      console.log('response: ', results);
-  });
+    if (err) {
+      console.error('Error running Python script:', err)
+      throw err
+    }
+    // results is an array consisting of messages collected during execution
+    console.log('response: ', results)
+  })
 }
+
+// 监听最小化命令
+ipcMain.on('window-min', () => {
+  mainWindow.minimize()
+  robotWindow.show()
+})
+
+// 监听恢复尺寸命令
+ipcMain.on('window-restore', () => {
+  mainWindow.restore()
+  robotWindow.minimize()
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -71,13 +104,17 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-  startServer_PY();
+  startServer_PY()
   createWindow()
+  createRobotWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+      createRobotWindow()
+    }
   })
 })
 
