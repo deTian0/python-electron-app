@@ -35,6 +35,21 @@ function createWindow(): void {
   }
 }
 
+// 启动flask server，通过python-shell 调用python脚本（开发调试阶段）
+function startServer_PY() {
+  var {PythonShell} = require('python-shell');
+
+  let options = {
+      mode: 'text',
+      pythonPath: '../../py/venv/Scripts/python'
+  };
+
+  PythonShell.run('../../py/app.py', options, function (err, results) {
+      if (err) throw err;
+      // results is an array consisting of messages collected during execution
+      console.log('response: ', results);
+  });
+}
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -51,7 +66,7 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-
+  startServer_PY();
   createWindow()
 
   app.on('activate', function () {
