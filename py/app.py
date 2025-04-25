@@ -56,7 +56,6 @@ class uiautoCalc():
     # self.logger = Loggers().myLogger()
     auto.uiautomation.DEBUG_SEARCH_TIME = False
     auto.uiautomation.SetGlobalSearchTimeout(2)  # 设置全局搜索超时时间
-    print('请在登录微信的情况下使用')
     self.wxWindow = auto.WindowControl(searchDepth=1, Name='微信', desc='微信窗口')  # 微信窗口
     if not self.wxWindow.Exists(0, 0):
 
@@ -159,10 +158,10 @@ class uiautoCalc():
     self.msgTextControl.SendKeys('{Enter}')
 
     # 重新获取控件树
-    tree = self.get_chiren_tree(self.wxWindow, )
-    # 打开文件，如果文件已存在则覆盖，否则创建
-    with open("element_node_tree_1.txt", "w", encoding="utf-8") as file:
-      self.print_tree(tree, file=file)
+    # tree = self.get_chiren_tree(self.wxWindow, )
+    # # 打开文件，如果文件已存在则覆盖，否则创建
+    # with open("element_node_tree_1.txt", "w", encoding="utf-8") as file:
+    #   self.print_tree(tree, file=file)
 
 
 @app.route('/sendMsg', methods=['POST'])
@@ -182,7 +181,7 @@ def send_msg():
     return jsonify({"error": "Nickname and message are required"}), 400
 
   # 打印接收到的数据（可以根据需要保存到数据库或其他处理逻辑）
-  print(f"收到消息：昵称 = {nickname}, 消息内容 = {message}, exepath = {exepath}")
+  # print(f"收到消息：昵称 = {nickname}, 消息内容 = {message}, exepath = {exepath}")
   th = threading.Thread(target=threadFunc, args=(nickname, message, exepath))
   th.start()
   th.join()

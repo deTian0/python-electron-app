@@ -20,8 +20,7 @@ const Calculator: React.FC = () => {
 
   return (
     <div>
-      <h1>Simple Python Calculator!</h1>
-      <p>Input something like <code>1 + 1</code>.</p>
+     
       <input
         id="input"
         type="text"
@@ -34,7 +33,6 @@ const Calculator: React.FC = () => {
       <br />
       <br />
       Got <span id="result">{result}</span>
-      <div id="root"></div>
     </div>
   );
 };
